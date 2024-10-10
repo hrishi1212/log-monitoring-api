@@ -1,29 +1,18 @@
 import express from "express";
 import logRoutes from "./routes";
+import { errorHandler } from "./errorHandler";
 
 const app = express();
 const port = 3000;
 
-// Middleware for parsing JSON bodies (if needed)
+// Middleware for parsing JSON bodies
 app.use(express.json());
 
 // Routes
 app.use("/logs", logRoutes);
 
 // Error handling middleware
-app.use(
-  (
-    err: any,
-    _: express.Request,
-    res: express.Response,
-    __: express.NextFunction
-  ) => {
-    console.error(err.stack);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", message: err.message });
-  }
-);
+app.use(errorHandler as unknown as express.RequestHandler);
 
 // Start the server
 app.listen(port, () => {

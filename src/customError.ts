@@ -21,12 +21,13 @@ export class BadRequestError extends CustomError {
 }
 
 export class NotFoundError extends CustomError {
-  constructor(message: string) {
+  constructor(message: string = "Not found") {
     super(message, 404);
   }
 }
-export class InternalServerError extends CustomError {
-  constructor(message: string) {
-    super(message, 500);
+
+export class UnauthorizedError extends CustomError {
+  constructor(message: string = "Not authorized") {
+    super(message, 401);
   }
 }

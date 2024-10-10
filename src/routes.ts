@@ -1,38 +1,31 @@
 import { Router, Request, Response, NextFunction } from "express";
-import {
-  BadRequestError,
-  InternalServerError,
-  NotFoundError,
-} from "./customError"; // Custom errors
+import { retrieveLogs } from "./logService";
+import { BadRequestError } from "./customError"; // Custom errors
 
 const router = Router();
 
-// GET /logs?filename=syslog&entries=100&keyword=error
-router.get("/", async (req: Request, res: Response, __: NextFunction) => {
-  const { filename, entries, keyword } = req.query;
-  if (!filename) {
-    throw new BadRequestError("Filename is required");
-  }
-
-  if (entries && isNaN(Number(entries))) {
-    throw new BadRequestError("'entries' must be a number");
-  }
-
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   // Implement the logic to retrieve log entries based on the query parameters
   try {
-    res.status(200).json({ filename, entries, keyword });
-  } catch (error: any) {
-    if (error.code === "ENOENT") {
-      throw new NotFoundError(`Log file ${filename} not found`);
-    } else {
-      throw new InternalServerError(`Something went wrong: ${error.message}`);
-    }
-  }
-});
+    const { filename, entries, keyword } = req.query;
 
-// 404 Route Not Found Error (for unmatched routes)
-router.all("*", (_: Request, __: Response, next: NextFunction) => {
-  next(new NotFoundError("Route not found"));
+    if (!filename) {
+      return next(new BadRequestError("Filename is required"));
+    }
+
+    if (entries && isNaN(Number(entries))) {
+      return next(new BadRequestError("'entries' must be a number"));
+    }
+
+    const logs = await retrieveLogs(
+      filename as string,
+      keyword as string | undefined,
+      entries ? parseInt(entries as string, 10) : undefined
+    );
+    res.status(200).json({ filename, logs });
+  } catch (error: any) {
+    return next(error);
+  }
 });
 
 export default router;
