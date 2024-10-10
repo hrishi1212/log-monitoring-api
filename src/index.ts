@@ -14,9 +14,9 @@ app.use("/logs", logRoutes);
 app.use(
   (
     err: any,
-    req: express.Request,
+    _: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    __: express.NextFunction
   ) => {
     console.error(err.stack);
     res
