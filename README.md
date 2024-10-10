@@ -1,2 +1,2 @@
 # log-monitoring-api
-ustomizable REST API that allows users to retrieve logs from multiple Unix-based servers without the need for manual logins to each machine. 
+Customizable REST API that allows users to retrieve logs from multiple Unix-based servers without the need for manual logins to each machine. 
