@@ -1,10 +1,14 @@
 import express from "express";
+import logRoutes from "./routes";
 
 const app = express();
 const port = 3000;
 
 // Middleware for parsing JSON bodies (if needed)
 app.use(express.json());
+
+// Routes
+app.use("/logs", logRoutes);
 
 // Error handling middleware
 app.use(
