@@ -6,6 +6,10 @@ Customizable REST API that allows users to retrieve logs from multiple Unix-base
 
 This API provides a mechanism to retrieve log entries from a specified log file. It can fetch logs from both a primary server and a set of secondary servers, depending on the query parameters provided.
 
+### Design
+
+[Design Document](https://drive.google.com/file/d/16rfGVuc2nnMT5jlkeX8n_vGIDsCr-8o6/view) - Overview of the API flow and approach taken.
+
 ### Installation
 
 - Clone the repository:
