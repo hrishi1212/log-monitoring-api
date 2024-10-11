@@ -42,7 +42,16 @@ npm run start
 npm run test
 ```
 
+- Test API with UI
+  navigate to `http://localhost:3000` and perform text base search.
+
 - The server will start running on `http://localhost:3000`.
+
+### UI Documentation
+
+## UI Endpoint
+
+`http://localhost:3000`
 
 ## Base URL
 

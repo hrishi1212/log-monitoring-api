@@ -12,6 +12,9 @@ const port: number = config.get<number>("port") || 3000;
 // Middleware for parsing JSON bodies
 app.use(express.json());
 
+// Serve static files from the "public" directory
+app.use(express.static("public"));
+
 // Routes
 app.use("/logs", logRoutes);
 
