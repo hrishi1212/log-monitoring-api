@@ -32,6 +32,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
       keyword as string | undefined,
       entries ? parseInt(entries as string, 10) : undefined
     );
+
     let combinedLogs = [...primaryLogs];
 
     if (fetchFromSecondary && fetchFromSecondary === "true") {
@@ -47,16 +48,14 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 
       const secondaryLogsArray = secondaryLogs
         .filter((log) => log.status === "fulfilled")
-        .map(
-          (result) => (result as PromiseFulfilledResult<any>).value.data.logs
-        );
+        .map((result) => (result as PromiseFulfilledResult<any>).value);
 
       combinedLogs = [...combinedLogs, ...secondaryLogsArray.flat()];
-      res.status(200).json({ filename, combinedLogs });
+      res.status(200).json({ filename, logs: combinedLogs });
       return;
     }
 
-    res.status(200).json({ filename, combinedLogs });
+    res.status(200).json({ filename, logs: combinedLogs });
   } catch (error: any) {
     return next(error);
   }
