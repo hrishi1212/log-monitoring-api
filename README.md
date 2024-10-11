@@ -11,7 +11,7 @@ This API provides a mechanism to retrieve log entries from a specified log file.
 - Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/log-monitoring-api.git
+git clone https://github.com/hrishi1212/log-monitoring-api.git
 ```
 
 - Navigate to the project directory:
