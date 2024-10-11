@@ -104,3 +104,8 @@ Retrieves log entries based on the specified parameters.
 ## Example 3: Fetch logs from secondary servers
 
 `GET /logs?filename=test.log&fetchFromSecondary=true`
+
+### Configuration
+
+- To pass the log file directory while testing or in any environment please modify the `config/${env}.json` file.
+- To pass the port number while testing please modify the `config/${env}.json` file.
