@@ -6,6 +6,40 @@ Customizable REST API that allows users to retrieve logs from multiple Unix-base
 
 This API provides a mechanism to retrieve log entries from a specified log file. It can fetch logs from both a primary server and a set of secondary servers, depending on the query parameters provided.
 
+### Installation
+
+- Clone the repository:
+
+```bash
+git clone https://github.com/your-username/log-monitoring-api.git
+```
+
+- Navigate to the project directory:
+
+```bash
+cd log-monitoring-api
+```
+
+- Install the required dependencies:
+
+```bash
+npm install
+```
+
+- Start the server:
+
+```bash
+npm run start
+```
+
+- Test API with unit tests
+
+```bash
+npm run test
+```
+
+- The server will start running on `http://localhost:3000`.
+
 ## Base URL
 
 `http://localhost:3000/logs`
