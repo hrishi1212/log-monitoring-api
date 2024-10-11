@@ -26,8 +26,23 @@ export class NotFoundError extends CustomError {
   }
 }
 
-export class UnauthorizedError extends CustomError {
-  constructor(message: string = "Not authorized") {
-    super(message, 401);
+export class InvalidKeywordError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidKeywordError";
+  }
+}
+
+export class NoLogEntriesFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NoLogEntriesFoundError";
+  }
+}
+
+export class KeywordTooBroadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "KeywordTooBroadError";
   }
 }

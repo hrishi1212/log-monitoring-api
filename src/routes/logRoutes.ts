@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { retrieveLogs } from "./logService";
-import { BadRequestError } from "./customError"; // Custom errors
+import { retrieveLogs } from "../services/logService";
+import { BadRequestError } from "../errors/customError"; // Custom errors
 
 const router = Router();
 

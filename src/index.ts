@@ -1,6 +1,6 @@
 import express from "express";
-import logRoutes from "./routes";
-import { errorHandler } from "./errorHandler";
+import logRoutes from "./routes/logRoutes";
+import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
 const port = 3000;
