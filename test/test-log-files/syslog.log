@@ -1,0 +1,5 @@
+Oct 10 12:00:01 server1 app1[12345]: Starting process
+Oct 10 12:01:02 server1 app1[12345]: Process completed
+Oct 10 12:02:03 server1 app2[67890]: Error: Something went wrong
+Oct 10 12:03:04 server1 app2[67890]: Process restarted
+
