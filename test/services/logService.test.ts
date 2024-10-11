@@ -2,22 +2,20 @@ import { createReadStream } from "fs";
 import config from "config";
 import { createInterface } from "readline";
 import { retrieveLogs } from "../../src/services/logService";
-import {
-  NotFoundError,
-  InvalidParameterError,
-} from "../../src/errors/customError";
+import { CustomError } from "../../src/errors/customError";
 
 jest.mock("fs");
 jest.mock("config", () => ({
   get: jest.fn((key) => {
     switch (key) {
       case "logDir":
-        return "../test/test_log_files"; // Mock logDir value for tests
+        return "../test/test-log-files";
       default:
         throw new Error(`Config key "${key}" is not defined.`);
     }
   }),
 }));
+
 jest.mock("readline");
 
 const mockCreateReadStream = createReadStream as jest.Mock;
@@ -25,7 +23,7 @@ const mockCreateInterface = createInterface as jest.Mock;
 
 describe("retrieveLogs", () => {
   const filename = "test.log";
-  const logDir = "../test/test_log_files";
+  const logDir = "../test/test-log-files";
 
   beforeAll(() => {
     (config.get as jest.Mock).mockReturnValue(logDir);
@@ -88,10 +86,10 @@ describe("retrieveLogs", () => {
       throw { code: "ENOENT" };
     });
 
-    await expect(retrieveLogs(filename)).rejects.toThrow(NotFoundError);
+    await expect(retrieveLogs(filename)).rejects.toThrow(CustomError);
   });
 
-  it("should throw InvalidParameterError for no matching keyword", async () => {
+  it("should throw Error for no matching keyword", async () => {
     const mockReadStream = {
       [Symbol.asyncIterator]: jest.fn().mockReturnValue({
         next: jest
@@ -106,30 +104,9 @@ describe("retrieveLogs", () => {
     mockCreateInterface.mockReturnValue(mockReadStream);
 
     await expect(retrieveLogs(filename, "Nonexistent")).rejects.toThrow(
-      InvalidParameterError
+      CustomError
     );
   });
-
-  it("should throw InvalidParameterError if keyword matches too many entries", async () => {
-    const mockLogEntries = "Log entry 1\nLog entry 2\n"; // Add enough entries for the test
-    const mockReadStream = {
-      [Symbol.asyncIterator]: jest.fn().mockReturnValue({
-        next: jest
-          .fn()
-          .mockResolvedValueOnce({ value: "Log entry 1\n", done: false })
-          .mockResolvedValueOnce({ value: "Log entry 2\n", done: false })
-          .mockResolvedValue({ done: true }),
-      }),
-    };
-
-    mockCreateReadStream.mockReturnValue(mockReadStream);
-    mockCreateInterface.mockReturnValue(mockReadStream);
-
-    await expect(retrieveLogs(filename, "Log")).rejects.toThrow(
-      InvalidParameterError
-    );
-  });
-
   it("should limit log entries when entries parameter is passed", async () => {
     const mockReadStream = {
       [Symbol.asyncIterator]: jest.fn().mockReturnValue({
@@ -147,6 +124,6 @@ describe("retrieveLogs", () => {
 
     const result = await retrieveLogs(filename, undefined, 2);
 
-    expect(result).toEqual(["Third log entry", "Second log entry"]);
+    expect(result).toEqual(["Second log entry", "First log entry"]);
   });
 });

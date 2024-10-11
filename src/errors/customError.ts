@@ -14,7 +14,6 @@ export class CustomError extends Error {
     super(message);
     this.statusCode = statusCode;
 
-    // Maintains proper stack trace (only on V8 environments)
     Object.setPrototypeOf(this, CustomError.prototype);
   }
 

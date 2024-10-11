@@ -13,7 +13,6 @@ const router = Router();
  * @returns A JSON response containing the retrieved log entries.
  */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-  // Implement the logic to retrieve log entries based on the query parameters
   try {
     const { filename, entries, keyword } = req.query;
 

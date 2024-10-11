@@ -27,13 +27,13 @@ const startServer = () => {
 
 // Check if we are in Primary mode
 if (cluster.isPrimary) {
-  const numCPUs = os.cpus().length; // Get the number of CPU cores
+  const numCPUs = os.cpus().length;
 
   console.log(`Primary ${process.pid} is running`);
 
   // Fork workers
   for (let i = 0; i < numCPUs; i++) {
-    cluster.fork(); // Create a new worker
+    cluster.fork();
   }
 
   // Monitor for worker exit
@@ -43,7 +43,6 @@ if (cluster.isPrimary) {
     );
   });
 } else {
-  // Workers can share any TCP connection
-  startServer(); // Start the server in worker mode
+  startServer();
   console.log(`Worker ${process.pid} started`);
 }
