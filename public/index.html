@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log Retrieval UI</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      label {
+        margin-right: 10px;
+      }
+      input,
+      select {
+        margin-bottom: 10px;
+      }
+      button {
+        margin-left: 10px;
+      }
+      .log-container {
+        margin-top: 20px;
+        background-color: #f7f7f7;
+        padding: 10px;
+        border: 1px solid #ccc;
+        height: 300px;
+        overflow-y: auto;
+      }
+      .error-message {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Log Retrieval UI</h1>
+
+    <div>
+      <label for="filename">Filename:</label>
+      <input
+        type="text"
+        id="filename"
+        placeholder="Enter log filename"
+        required
+      />
+    </div>
+
+    <div>
+      <label for="entries">Entries:</label>
+      <input type="number" id="entries" placeholder="Number of log entries" />
+    </div>
+
+    <div>
+      <label for="keyword">Keyword:</label>
+      <input type="text" id="keyword" placeholder="Search keyword" />
+    </div>
+
+    <div>
+      <label for="fetchFromSecondary">Fetch from secondary server:</label>
+      <select id="fetchFromSecondary">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
+    </div>
+
+    <button id="fetchLogsBtn">Fetch Logs</button>
+
+    <div class="log-container" id="logContainer">
+      <pre id="logOutput">Logs will appear here...</pre>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <script>
+      const fetchLogsBtn = document.getElementById("fetchLogsBtn");
+      const logOutput = document.getElementById("logOutput");
+      const errorMessage = document.getElementById("errorMessage");
+
+      fetchLogsBtn.addEventListener("click", async () => {
+        const filename = document.getElementById("filename").value;
+        const entries = document.getElementById("entries").value;
+        const keyword = document.getElementById("keyword").value;
+        const fetchFromSecondary =
+          document.getElementById("fetchFromSecondary").value;
+
+        if (!filename) {
+          errorMessage.textContent = "Filename is required!";
+          return;
+        }
+
+        errorMessage.textContent = "";
+
+        try {
+          const queryParams = new URLSearchParams();
+
+          if (filename) queryParams.append("filename", filename);
+          if (entries) queryParams.append("entries", entries);
+          if (keyword) queryParams.append("keyword", keyword);
+          if (fetchFromSecondary)
+            queryParams.append("fetchFromSecondary", fetchFromSecondary);
+
+          const response = await fetch(`/logs?${queryParams.toString()}`);
+          const data = await response.json();
+
+          if (response.ok) {
+            logOutput.textContent = data.logs.join("\n");
+          } else {
+            errorMessage.textContent = data.message || "An error occurred.";
+          }
+        } catch (error) {
+          errorMessage.textContent = "Error fetching logs: " + error.message;
+        }
+      });
+    </script>
+  </body>
+</html>
