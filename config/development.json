@@ -2,5 +2,6 @@
   "logDir": "./test/test-log-files",
   "defaultLogLimit": 1000,
   "port": 3000,
-  "environment": "development"
+  "environment": "development",
+  "secondaryServers": ["http://localhost:3000", "http://localhost:3001"]
 }

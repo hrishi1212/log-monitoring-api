@@ -1,8 +1,11 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { retrieveLogs } from "../services/logService";
 import { BadRequestError } from "../errors/customError"; // Custom errors
+import config from "config";
 
 const router = Router();
+const SECONDARY_SERVERS: Array<string> =
+  config.get<Array<string>>("secondaryServers");
 
 /**
  * Retrieves log entries based on the provided query parameters.
@@ -14,7 +17,7 @@ const router = Router();
  */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { filename, entries, keyword } = req.query;
+    const { filename, entries, keyword, fetchFromSecondary } = req.query;
 
     if (!filename) {
       return next(new BadRequestError("Filename is required"));
@@ -24,12 +27,36 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
       return next(new BadRequestError("'entries' must be a number"));
     }
 
-    const logs = await retrieveLogs(
+    const primaryLogs = await retrieveLogs(
       filename as string,
       keyword as string | undefined,
       entries ? parseInt(entries as string, 10) : undefined
     );
-    res.status(200).json({ filename, logs });
+    let combinedLogs = [...primaryLogs];
+
+    if (fetchFromSecondary && fetchFromSecondary === "true") {
+      const secondaryLogs = await Promise.allSettled(
+        SECONDARY_SERVERS.map((secondaryServer) =>
+          fetch(
+            `${secondaryServer}?filename=${filename}&entries=${entries}&keyword=${keyword}`
+          )
+            .then((response) => response.json())
+            .then((data) => data.logs)
+        )
+      );
+
+      const secondaryLogsArray = secondaryLogs
+        .filter((log) => log.status === "fulfilled")
+        .map(
+          (result) => (result as PromiseFulfilledResult<any>).value.data.logs
+        );
+
+      combinedLogs = [...combinedLogs, ...secondaryLogsArray.flat()];
+      res.status(200).json({ filename, combinedLogs });
+      return;
+    }
+
+    res.status(200).json({ filename, combinedLogs });
   } catch (error: any) {
     return next(error);
   }

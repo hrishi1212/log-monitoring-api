@@ -5,6 +5,7 @@ import { createInterface } from "readline";
 import { NotFoundError, InvalidParameterError } from "../errors/customError";
 
 const LOG_DIR: string = config.get<string>("logDir");
+
 /**
  * Retrieves log entries from a file, with optional filtering by keyword and limiting the number of entries.
  *
