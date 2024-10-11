@@ -1,0 +1,38 @@
+{
+  "name": "log-monitoring-api",
+  "version": "1.0.0",
+  "description": "Customizable REST API that allows users to retrieve logs from multiple Unix-based servers without the need for manual logins to each machine.",
+  "main": "index.js",
+  "scripts": {
+    "start": "TZ=UTC NODE_ENV=development ts-node src/index.ts",
+    "start:integration": "TZ=UTC NODE_ENV=integration ts-node src/index.ts",
+    "start:production": "TZ=UTC NODE_ENV=production ts-node src/index.ts",
+    "start:staging": "TZ=UTC NODE_ENV=staging ts-node src/index.ts",
+    "build": "tsc",
+    "test": "NODE_ENV=test TZ=UTC jest",
+    "test:coverage": "NODE_ENV=test TZ=UTC jest --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "config": "^3.3.12",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/config": "^3.3.5",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^22.7.5",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  }
+}
