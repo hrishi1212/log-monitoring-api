@@ -1,3 +1,12 @@
+/**
+ * Represents a custom error with a status code.
+ *
+ * This class extends the built-in `Error` class and adds a `statusCode` property to
+ * represent the HTTP status code associated with the error.
+ *
+ * The `serializeErrors()` method returns an array of error objects with a `message`
+ * property, which can be used for serializing the error to a response.
+ */
 export class CustomError extends Error {
   statusCode: number;
 
@@ -26,23 +35,8 @@ export class NotFoundError extends CustomError {
   }
 }
 
-export class InvalidKeywordError extends Error {
+export class InvalidParameterError extends CustomError {
   constructor(message: string) {
-    super(message);
-    this.name = "InvalidKeywordError";
-  }
-}
-
-export class NoLogEntriesFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NoLogEntriesFoundError";
-  }
-}
-
-export class KeywordTooBroadError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "KeywordTooBroadError";
+    super(message, 422);
   }
 }

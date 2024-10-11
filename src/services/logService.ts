@@ -1,63 +1,83 @@
-import { promises as fs } from "fs";
+import { createReadStream } from "fs";
+import config from "config";
 import * as path from "path";
-import {
-  NotFoundError,
-  InvalidKeywordError,
-  NoLogEntriesFoundError,
-  KeywordTooBroadError,
-} from "../errors/customError";
+import { createInterface } from "readline";
+import { NotFoundError, InvalidParameterError } from "../errors/customError";
 
-const LOG_DIR = "/var/log"; // Assuming logs are in /var/log
-
-// Function to retrieve logs with optional filtering and limiting
+const LOG_DIR: string = config.get<string>("logDir");
+/**
+ * Retrieves log entries from a file, with optional filtering by keyword and limiting the number of entries.
+ *
+ * @param filename - The name of the log file to retrieve entries from.
+ * @param keyword - (Optional) A keyword to filter the log entries by.
+ * @param entries - (Optional) The maximum number of log entries to retrieve.
+ * @returns An array of log entry strings.
+ * @throws {NotFoundError} If the specified log file is not found.
+ * @throws {InvalidParameterError} If the provided keyword matches too many entries or no entries are found.
+ */
 export const retrieveLogs = async (
   filename: string,
   keyword?: string,
   entries?: number
 ): Promise<string[]> => {
-  const filePath = path.join(LOG_DIR, filename);
-
-  // Attempt to read the file, throw an error if it does not exist
-  let data: string;
   try {
-    data = await fs.readFile(filePath, "utf-8");
-  } catch (err) {
-    throw new NotFoundError(`Log file "${filename}" not found on server`);
-  }
+    const filePath = path.join(LOG_DIR, filename);
 
-  // Split the log file and remove empty lines
-  let logEntries = data.split("\n").filter(Boolean);
+    let fileStream;
+    fileStream = createReadStream(filePath, { encoding: "utf-8" });
 
-  // Validate and filter by keyword if provided
-  if (keyword) {
-    if (keyword.trim() === "") {
-      throw new InvalidKeywordError("Keyword query is invalid or empty");
+    // Create a line-by-line stream
+    const rl = createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+
+    let logEntries: string[] = [];
+
+    // Process the file line by line
+    for await (const line of rl) {
+      const trimmedLine = line.trim();
+      if (trimmedLine === "") {
+        continue;
+      }
+
+      // If a keyword is provided, only include lines that contain the keyword
+      if (keyword) {
+        if (trimmedLine.includes(keyword)) {
+          logEntries.push(trimmedLine);
+        }
+      } else {
+        logEntries.push(trimmedLine); // If no keyword, add all lines
+      }
     }
 
-    logEntries = logEntries.filter((line) => line.includes(keyword));
-
-    // Handle no matching log entries
-    if (logEntries.length === 0) {
-      throw new NoLogEntriesFoundError(
+    // If a keyword is provided and no matching entries are found
+    if (keyword && logEntries.length === 0) {
+      throw new InvalidParameterError(
         `No log entries found matching the keyword "${keyword}"`
       );
     }
 
-    // Handle too broad keyword case (if more than 1000 matches)
-    if (logEntries.length > 1000) {
-      throw new KeywordTooBroadError(
+    // If more than 1000 keyword matches, consider it too broad
+    if (keyword && logEntries.length > 1000) {
+      throw new InvalidParameterError(
         `The keyword "${keyword}" is too broad and matches too many entries`
       );
     }
+
+    // Reverse to get newest logs first
+    logEntries.reverse();
+
+    // Apply entries limit if provided
+    if (entries && entries > 0) {
+      logEntries = logEntries.slice(-entries);
+    }
+
+    return logEntries;
+  } catch (err: any) {
+    if (err.code === "ENOENT") {
+      throw new NotFoundError(`Log file "${filename}" not found on server`);
+    }
+    throw err;
   }
-
-  // Reverse to get newest logs first
-  logEntries.reverse();
-
-  // Limit the log entries to the specified 'n' entries
-  if (entries && entries > 0) {
-    logEntries = logEntries.slice(-entries);
-  }
-
-  return logEntries;
 };

@@ -1,0 +1,6 @@
+{
+  "logDir": "/var/log",
+  "defaultLogLimit": 1000,
+  "port": 3000,
+  "environment": "integration"
+}

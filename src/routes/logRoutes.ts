@@ -4,6 +4,14 @@ import { BadRequestError } from "../errors/customError"; // Custom errors
 
 const router = Router();
 
+/**
+ * Retrieves log entries based on the provided query parameters.
+ *
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param next - The Express next middleware function.
+ * @returns A JSON response containing the retrieved log entries.
+ */
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   // Implement the logic to retrieve log entries based on the query parameters
   try {
