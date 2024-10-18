@@ -29,7 +29,7 @@ const getDynamicChunkSize = (): number => {
  * @param entries - (Optional) The maximum number of log entries to retrieve.
  * @returns An array of log entry strings.
  * @throws {NotFoundError} If the specified log file is not found.
- * @throws {InvalidParameterError} If the provided keyword matches too many entries or no entries are found.
+ * @throws {InvalidParameterError} If the provided keyword, no entries are found.
  */
 export const retrieveLogs = async (
   filename: string,
