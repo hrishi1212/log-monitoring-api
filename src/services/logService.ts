@@ -16,8 +16,8 @@ const LOG_DIR: string = config.get<string>("logDir");
 const getDynamicChunkSize = (): number => {
   // get free system memory in bytes
   const freeMemory = os.freemem();
-  
-  //Allocate 1% of free memory for reading chunks, but set a min/max limit.
+
+  // Allocate 1% of free memory for reading chunks, but set a min/max limit.
   const chunkSize = Math.min(
     Math.max(freeMemory * 0.01, 64 * 1024),
     256 * 1024
