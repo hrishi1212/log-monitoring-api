@@ -28,71 +28,108 @@ const getDynamicChunkSize = (): number => {
  * @param keyword - (Optional) A keyword to filter the log entries by.
  * @param entries - (Optional) The maximum number of log entries to retrieve.
  * @returns An array of log entry strings.
- * @throws {NotFoundError} If the specified log file is not found.
- * @throws {InvalidParameterError} If the provided keyword, no entries are found.
  */
 export const retrieveLogs = async (
   filename: string,
   keyword?: string,
-  entries?: number
+  maxEntries?: number
 ): Promise<string[]> => {
+  const filePath = path.join(LOG_DIR, filename);
+  const logEntries: string[] = [];
+
   try {
-    const filePath = path.join(LOG_DIR, filename);
+    const fileSize = getFileSize(filePath);
+    const fd = await open(filePath, "r");
 
-    // Check if the file exists and get its size
-    const fileStat = statSync(filePath);
-    let position = fileStat.size;
+    await readLogFile(fd, fileSize, keyword, maxEntries, logEntries);
 
-    // Define the chunk size for reading in reverse, get it dynamically by system resource
-    const CHUNK_SIZE = getDynamicChunkSize();
-    const fd = await open(filePath, 'r');
-   
-    let buffer = Buffer.alloc(CHUNK_SIZE);
-
-    let logEntries: string[] = [];
-    let lineBuffer = '';
-
-    // Read the file in reverse
-    while (position > 0 && (!entries || logEntries.length < entries)) {
-      const bytesToRead = Math.min(CHUNK_SIZE, position);
-      position -= bytesToRead;
-
-      // Read the chunk
-      const { bytesRead } = await fd.read(buffer, 0, bytesToRead, position);
-
-      // Split the chunk into lines and append to lineBuffer
-      const chunk = buffer.toString('utf-8', 0, bytesRead);
-      lineBuffer = chunk + lineBuffer;
-
-      const lines = lineBuffer.split(/\r?\n/);
-
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const line = lines[i].trim();
-
-        // Filter based on the keyword if provided
-        if (line && (!keyword || line.includes(keyword))) {
-          logEntries.push(line);
-
-          // Stop if we have the required number of entries
-          if (entries && logEntries.length >= entries) {
-            break;
-          }
-        }
-      }
-    }
-
-    // Throw an error if keyword is provided and no matching entries are found
     if (keyword && logEntries.length === 0) {
       throw new InvalidParameterError(`No log entries found matching the keyword "${keyword}"`);
     }
-    
-    await fd.close();
 
+    await fd.close();
     return logEntries;
   } catch (err: any) {
-    if (err.code === "ENOENT") {
-      throw new NotFoundError(`Log file "${filename}" not found on server`);
-    }
-    throw err;
+    return handleErrors(err, filename);
   }
+};
+
+/**
+ * Gets the size of the log file.
+ */
+const getFileSize = (filePath: string): number => {
+  const fileStat = statSync(filePath);
+  return fileStat.size;
+};
+
+/**
+ * Reads the log file in reverse order, processing chunks and filtering by keyword.
+ */
+const readLogFile = async (
+  fd: any,
+  fileSize: number,
+  keyword: string | undefined,
+  maxEntries: number | undefined,
+  logEntries: string[]
+) => {
+  const CHUNK_SIZE = getDynamicChunkSize();
+  let position = fileSize;
+  let buffer = Buffer.alloc(CHUNK_SIZE);
+  let lineBuffer = "";
+
+  while (position > 0 && (!maxEntries || logEntries.length < maxEntries)) {
+    const bytesToRead = Math.min(CHUNK_SIZE, position);
+    position -= bytesToRead;
+
+    const chunk = await readChunk(fd, buffer, bytesToRead, position);
+    lineBuffer = chunk + lineBuffer;
+
+    const lines = lineBuffer.split(/\r?\n/);
+
+    processLogLines(lines, keyword, logEntries, maxEntries);
+  }
+};
+
+/**
+ * Reads a chunk of data from the file at a given position.
+ */
+const readChunk = async (
+  fd: any,
+  buffer: Buffer,
+  bytesToRead: number,
+  position: number
+): Promise<string> => {
+  const { bytesRead } = await fd.read(buffer, 0, bytesToRead, position);
+  return buffer.toString("utf-8", 0, bytesRead);
+};
+
+
+/**
+ * Processes log lines and filters them based on the keyword.
+ */
+const processLogLines = (
+  lines: string[],
+  keyword: string | undefined,
+  logEntries: string[],
+  maxEntries: number | undefined
+) => {
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim();
+    if (line && (!keyword || line.includes(keyword))) {
+      logEntries.push(line);
+      if (maxEntries && logEntries.length >= maxEntries) {
+        break;
+      } 
+    }
+  }
+};
+
+/**
+ * Handles specific error cases and rethrows unexpected errors.
+ */
+const handleErrors = (err: any, filename: string) => {
+  if (err.code === "ENOENT") {
+    throw new NotFoundError(`Log file "${filename}" not found on server`);
+  }
+  throw err;
 };
