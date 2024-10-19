@@ -11,10 +11,11 @@ This API provides a mechanism to retrieve log entries from a specified log file.
 [Design Document](https://drive.google.com/file/d/16rfGVuc2nnMT5jlkeX8n_vGIDsCr-8o6/view) - Overview of the API flow and approach taken.
 
 ### Key Optimizations
-- 1. Reverse File Reading: We read the file in reverse by seeking chunks from the end, making it faster to retrieve the most recent log entries.
-- 2. Memory Efficiency: Instead of loading the entire file into memory, we process the file in small chunks (dynamic memory allocation by server), which keeps memory usage low.
-- 3. Keyword Filtering: Filtering is applied as the lines are processed, ensuring we only keep relevant logs.
-- 4. Entry Limiting: The loop breaks once the required number of log entries (entries) is found, further reducing unnecessary processing.
+- Reverse File Reading: We read the file in reverse by seeking chunks from the end, making it faster to retrieve the most recent log entries.
+- Memory Efficiency: Instead of loading the entire file into memory, we process the file in small chunks (dynamic memory allocation by server), which keeps memory usage low.
+- Dynamic memory allocation: By adapting the chunk size based on available system memory, you can avoid loading more data into memory than the system can handle. If there's ample memory, using larger chunks can reduce the number of I/O operations, which may improve file read throughput.
+- Keyword Filtering: Filtering is applied as the lines are processed, ensuring we only keep relevant logs.
+- Entry Limiting: The loop breaks once the required number of log entries (entries) is found, further reducing unnecessary processing.
 
 ## Performance Considerations
 - Concurrency: If the system needs to process multiple log files concurrently, combining this approach with clustering which is already been used here or worker threads can further improve throughput.
