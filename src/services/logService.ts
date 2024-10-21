@@ -40,10 +40,11 @@ export const retrieveLogs = async (
 ): Promise<string[]> => {
   const filePath = path.join(LOG_DIR, filename);
   const logEntries: string[] = [];
+  let fd: FileHandle | undefined;
 
   try {
     const fileSize = getFileSize(filePath);
-    const fd = await open(filePath, "r");
+    fd = await open(filePath, "r");
 
     await readLogFile(fd, fileSize, keyword, maxEntries, logEntries);
 
@@ -53,10 +54,13 @@ export const retrieveLogs = async (
       );
     }
 
-    await fd.close();
     return logEntries;
   } catch (err: any) {
     return handleErrors(err, filename);
+  } finally {
+    if (fd) {
+      await fd.close();
+    }
   }
 };
 
