@@ -66,6 +66,9 @@ export const retrieveLogs = async (
  */
 const getFileSize = (filePath: string): number => {
   const fileStat = statSync(filePath);
+  if (fileStat.size === 0) {
+    throw new NotFoundError(`Log file ${filePath} is empty`);
+  }
   return fileStat.size;
 };
 
