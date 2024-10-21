@@ -14,8 +14,10 @@ const LOG_DIR: string = config.get<string>("logDir");
  * @returns chunk size in bytes
  */
 const getDynamicChunkSize = (): number => {
-  // get free from system
+  // get free system memory in bytes
   const freeMemory = os.freemem();
+
+  // Allocate 1% of free memory for reading chunks, but set a min/max limit.
   const chunkSize = Math.min(
     Math.max(freeMemory * 0.01, 64 * 1024),
     256 * 1024
@@ -93,6 +95,7 @@ const readLogFile = async (
   let buffer = Buffer.alloc(CHUNK_SIZE);
   let lineBuffer = "";
 
+  // Read the file in reverse
   while (position > 0 && (!maxEntries || logEntries.length < maxEntries)) {
     const bytesToRead = Math.min(CHUNK_SIZE, position);
     position -= bytesToRead;
@@ -116,7 +119,7 @@ const readLogFile = async (
  * @returns A promise that resolves to the string representation of the read data.
  */
 const readChunk = async (
-  fd: any,
+  fd: FileHandle,
   buffer: Buffer,
   bytesToRead: number,
   position: number
@@ -141,8 +144,12 @@ const processLogLines = (
 ) => {
   for (let i = lines.length - 1; i >= 0; i--) {
     const line = lines[i].trim();
+
+    // Filter based on the keyword if provided
     if (line && (!keyword || line.includes(keyword))) {
       logEntries.push(line);
+
+      // Stop if we have the required number of entries
       if (maxEntries && logEntries.length >= maxEntries) {
         break;
       }
